@@ -5,3 +5,4 @@ pillow>=10.0
 scikit-image>=0.21
 tifffile>=2023.7.10
 matplotlib>=3.7
+huggingface_hub

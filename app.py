@@ -21,7 +21,7 @@ import random
 import numpy as np
 import streamlit as st
 import torch
-
+from huggingface_hub import hf_hub_download
 from PIL import Image, ImageDraw, ImageFont
 from torchvision import transforms
 
@@ -166,6 +166,25 @@ if not IMPORT_OK:
 # INITIALIZE
 # ============================================================
 
+MODEL_REPO = "iamsabeerkhansk/GeoVisionAI-Models"
+
+
+@st.cache_resource
+def download_models():
+
+    landcover_path = hf_hub_download(
+        repo_id=MODEL_REPO,
+        filename="landcover_vit_final.pt",
+    )
+
+    changedet_path = hf_hub_download(
+        repo_id=MODEL_REPO,
+        filename="changedet_epoch05.pt",
+    )
+
+    return Path(landcover_path), Path(changedet_path)
+
+
 try:
 
     cfg = get_config()
@@ -173,13 +192,11 @@ try:
     if torch.cuda.is_available():
 
         device = torch.device("cuda")
-
         gpu_name = torch.cuda.get_device_name(0)
 
     else:
 
         device = torch.device("cpu")
-
         gpu_name = "CPU"
 
     cfg.device = device
@@ -195,21 +212,9 @@ try:
         exist_ok=True,
     )
 
-    # Checkpoints
-    checkpoint_dir = (
-        Path(cfg.paths.output_dir)
-        / "checkpoints"
-    )
+    # Download checkpoints from Hugging Face
+    landcover_checkpoint, changedet_checkpoint = download_models()
 
-    landcover_checkpoint = (
-        checkpoint_dir
-        / "landcover_vit_final.pt"
-    )
-
-    changedet_checkpoint = (
-        checkpoint_dir
-        / "changedet_epoch05.pt"
-    )
 
 except Exception as e:
 
@@ -219,6 +224,37 @@ except Exception as e:
 
     st.exception(e)
 
+    st.stop()
+# ============================================================
+# CHECKPOINTS
+# ============================================================
+
+MODEL_REPO = "iamsabeerkhansk/GeoVisionAI-Models"
+
+
+@st.cache_resource
+def download_models():
+    landcover_path = hf_hub_download(
+        repo_id=MODEL_REPO,
+        filename="landcover_vit_final.pt",
+    )
+
+    changedet_path = hf_hub_download(
+        repo_id=MODEL_REPO,
+        filename="changedet_epoch05.pt",
+    )
+
+    return Path(landcover_path), Path(changedet_path)
+
+
+try:
+
+    landcover_checkpoint, changedet_checkpoint = download_models()
+
+except Exception as e:
+
+    st.error("❌ Could not download GeoVision AI models from Hugging Face.")
+    st.exception(e)
     st.stop()
 
 

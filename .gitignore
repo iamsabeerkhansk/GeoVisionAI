@@ -8,7 +8,6 @@ runs/
 logs/
 
 *.pth
-*.pt
 *.ckpt
 
 data/
